@@ -94,8 +94,8 @@ time.sleep(2)
 
 @torch.no_grad()  # 不要删 (do not delete it )
 def find_target(
-        weights=ROOT / 'apex_best_2.engine',  # model.pt path(s) 选择自己的模型
-        # weights=ROOT / 'apex_best_2.pt',  # model.pt path(s)
+        # weights=ROOT / 'apex_best_2.engine',  # model.pt path(s) 选择自己的模型
+        weights=ROOT / 'apex_best_2.pt',  # model.pt path(s)
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
@@ -125,6 +125,7 @@ def find_target(
     # for i in range(500):           # for i in range(500) 运行500轮测速 (run 500 rounds to check each round spend)
     print(f"imgz = {imgsz}")
     while True:
+        time.sleep(1)
         img0 = grab_screen(grab_window_location)
         img0 = cv2.cvtColor(img0, cv2.COLOR_BGRA2BGR)
 
@@ -194,6 +195,21 @@ def find_target(
 
                     """ 单片机执行位移，每个人位移的实现不一样，位移坐标你都拿到了，动鼠标的事情自己考虑
                     since you have gotten the x y movement data,choose your own way to move the mouse to aim enemy"""
+                    
+                    if aim_x_left < target_xywh_x < aim_x_right and aim_y_up < target_xywh_y < aim_y_down:
+                        # 计算鼠标相对移动距离
+                        final_x = target_xywh_x - screen_x_center
+                        final_y = target_xywh_y - screen_y_center - y_portion * target_xywh[3]
+                        
+                        # 如果目标不在屏幕中心，则移动鼠标
+                        if final_x != 0 or final_y != 0:
+                            # 计算 PID 控制后的移动距离
+                            pid_x = int(pid.calculate(final_x, 0))
+                            pid_y = int(pid.calculate(final_y, 0))
+                            print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
+                            
+                            # 使用相对移动距离移动鼠标
+                            win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, pid_x, pid_y, 0, 0)
 
                     # ser.write(f'km.move({pid_x},{pid_y})\r\n'.encode('utf-8'))
 
