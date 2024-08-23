@@ -1,4 +1,6 @@
 # yolov5-tensorrt-aimbot
+添加了鼠标移动功能可以直接用
+
 FPS game AI aimassist framework
 AI 是拿来用的，不是用来坑小白钱的
 
